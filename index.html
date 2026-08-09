@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="phub is a fast, keyboard-first terminal project manager for developers.">
+    <meta name="theme-color" content="#f3f5f0">
+    <link rel="canonical" href="https://chenboda01.github.io/phub/">
+    <meta property="og:title" content="phub | Your projects. One terminal.">
+    <meta property="og:description" content="A fast, keyboard-first terminal project manager for developers.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://chenboda01.github.io/phub/">
+    <title>phub | Your projects. One terminal.</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="site.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container masthead">
+        <a class="brand" href="./" aria-label="phub home">
+          <span class="brand-mark" aria-hidden="true">p</span>
+          <span>phub</span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="#install">Install</a>
+          <a href="#status">Status</a>
+          <a href="https://github.com/Chenboda01/phub" rel="noreferrer">Source</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">A terminal project launcher</p>
+            <h1 id="hero-title">Your projects.<br>One terminal.</h1>
+            <p class="lede">Find what you want to work on, choose it with the keyboard, and get out of the way.</p>
+            <div class="actions">
+              <a class="button button-primary" href="#install">Install phub</a>
+              <a class="button button-quiet" href="#status">See current scope</a>
+            </div>
+          </div>
+
+          <figure class="terminal" aria-label="Current phub prototype output">
+            <figcaption class="terminal-bar">
+              <span>phub</span>
+              <span>0.0.1 prototype</span>
+            </figcaption>
+            <pre class="terminal-screen"><code><span class="terminal-prompt">$ phub</span><span class="terminal-search">Search projects... (press /)</span><span class="terminal-row terminal-selected">&gt; Forge</span><span class="terminal-row">  phub</span><span class="terminal-row">  ScreenBot</span><span class="terminal-row">  Website</span><span class="terminal-help">j/k or arrows: navigate | enter: open | /: search | q: quit</span></code></pre>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="purpose-title">
+        <div class="container statement-layout">
+          <div>
+            <h2 id="purpose-title">One job. No detours.</h2>
+          </div>
+          <div class="reading-copy">
+            <p>phub keeps project navigation local, fast, and explicit. It does not try to become your editor, Git client, file manager, shell, or package manager.</p>
+            <p>It helps you find a project and hand it to the tool that already does the next job well.</p>
+          </div>
+        </div>
+        <div class="container principle-list" aria-label="phub principles">
+          <article>
+            <span>01</span>
+            <h3>Keyboard first</h3>
+            <p>Navigation stays immediate and discoverable without a mouse.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Local by default</h3>
+            <p>Project information belongs on your machine, not behind an account.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Explicit actions</h3>
+            <p>phub never runs project code or changes a project on its own.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tint" id="install" aria-labelledby="install-title">
+        <div class="container install-layout">
+          <div class="install-intro">
+            <p class="section-label">Install</p>
+            <h2 id="install-title">Install from source.</h2>
+            <p>phub is in early development. The current source requires Go 1.25 or newer.</p>
+          </div>
+          <ol class="install-steps">
+            <li>
+              <span>1</span>
+              <div>
+                <h3>Clone the repository</h3>
+                <pre class="code-block" aria-label="Clone phub"><code>git clone https://github.com/Chenboda01/phub.git
+cd phub</code></pre>
+              </div>
+            </li>
+            <li>
+              <span>2</span>
+              <div>
+                <h3>Build and install</h3>
+                <pre class="code-block" aria-label="Install phub"><code>go install ./cmd/phub</code></pre>
+              </div>
+            </li>
+            <li>
+              <span>3</span>
+              <div>
+                <h3>Start phub</h3>
+                <pre class="code-block" aria-label="Run phub"><code>phub</code></pre>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <div class="container support-note">
+          <details>
+            <summary>Command not found after installation?</summary>
+            <p>Go installs commands into its bin directory. Add it to your shell path, then open a new terminal.</p>
+            <pre class="code-block" aria-label="Add Go bin directory to Fish path"><code>fish_add_path (go env GOPATH)/bin</code></pre>
+            <p>For POSIX-compatible shells, use <code>export PATH="$(go env GOPATH)/bin:$PATH"</code>.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" id="status" aria-labelledby="status-title">
+        <div class="container status-layout">
+          <div class="status-intro">
+            <p class="section-label">Project status</p>
+            <h2 id="status-title">A real prototype, not a promise.</h2>
+            <p>The current milestone is intentionally small so the core interaction can be tested before the project grows.</p>
+          </div>
+          <div class="status-panel">
+            <div class="status-row">
+              <span class="status-state">Implemented</span>
+              <div>
+                <h3>0.0.1 TUI prototype</h3>
+                <p>Hardcoded project list, selection state, Vim and arrow navigation, responsive terminal sizing, search and open placeholders, and clean quit behavior.</p>
+              </div>
+            </div>
+            <div class="status-row">
+              <span class="status-state">Planned</span>
+              <div>
+                <h3>Discovery and project metadata</h3>
+                <p>Real project scanning, language detection, Git status, search, launching, and persistence remain future milestones.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section roadmap-section" aria-labelledby="roadmap-title">
+        <div class="container roadmap-header">
+          <h2 id="roadmap-title">Build the workflow in small steps.</h2>
+          <p>Each milestone keeps phub focused on one question: what do I want to work on right now?</p>
+        </div>
+        <ol class="container roadmap">
+          <li>
+            <span>0.0.1</span>
+            <div>
+              <h3>TUI prototype</h3>
+              <p>Available now: keyboard navigation and a responsive project selection surface.</p>
+            </div>
+          </li>
+          <li>
+            <span>0.0.2</span>
+            <div>
+              <h3>Project discovery</h3>
+              <p>Planned: scan configured roots, detect project markers, and keep discovery read-only.</p>
+            </div>
+          </li>
+          <li>
+            <span>0.0.3+</span>
+            <div>
+              <h3>Metadata, search, and launch</h3>
+              <p>Planned: useful project state at a glance, fast filtering, and explicit tool handoff.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section section-tint safety-section" aria-labelledby="safety-title">
+        <div class="container safety-layout">
+          <div>
+            <p class="section-label">Safety by design</p>
+            <h2 id="safety-title">Your project stays yours.</h2>
+          </div>
+          <p>Discovery reads markers. Launching only happens after you ask. phub does not install dependencies, run scripts, modify project files, or compose shell commands from project paths.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <p><strong>phub</strong> <span>Your projects. One terminal.</span></p>
+        <a href="https://github.com/Chenboda01/phub" rel="noreferrer">GitHub repository</a>
+      </div>
+    </footer>
+  </body>
+</html>

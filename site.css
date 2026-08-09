@@ -1,0 +1,591 @@
+:root {
+  --canvas: #f3f5f0;
+  --surface: #ffffff;
+  --ink: #18221c;
+  --muted: #59665f;
+  --line: #d8ded8;
+  --accent: #c8552a;
+  --accent-strong: #9b3d1f;
+  --terminal: #142019;
+  --terminal-ink: #eef5ef;
+  --type-display: clamp(3rem, 7vw, 5.75rem);
+  --type-heading: clamp(2rem, 4vw, 3.25rem);
+  --type-subheading: 1.5rem;
+  --type-body: 1rem;
+  --type-small: 0.875rem;
+  --type-mono: 0.875rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --content-width: 70rem;
+  --reading-width: 44rem;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --radius: 0.5rem;
+  --radius-terminal: 0.75rem;
+  --shadow-terminal: 0 1rem 2.5rem rgba(20, 32, 25, 0.18), 0 0.25rem 0.75rem rgba(20, 32, 25, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color-scheme: light dark;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #101713;
+    --surface: #19231d;
+    --ink: #f3f6f2;
+    --muted: #b2c0b8;
+    --line: #304139;
+    --accent: #ef7b50;
+    --accent-strong: #ff986e;
+    --terminal: #0c120f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: var(--type-body);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+a:focus-visible,
+summary:focus-visible {
+  border-radius: var(--radius);
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.container {
+  width: min(var(--content-width), calc(100% - (var(--gutter) * 2)));
+  margin-inline: auto;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  top: var(--space-3);
+  left: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--accent);
+  color: var(--surface);
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--canvas) 92%, transparent);
+}
+
+.masthead,
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  min-height: 4.5rem;
+}
+
+.brand,
+.masthead nav,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.brand {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1px solid currentcolor;
+  border-radius: var(--radius);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 1rem;
+}
+
+.masthead nav {
+  flex-wrap: wrap;
+  font-size: var(--type-small);
+  font-weight: 600;
+}
+
+.hero {
+  padding-block: clamp(var(--space-16), 11vw, 9rem) var(--space-24);
+}
+
+.hero-grid {
+  display: grid;
+  align-items: center;
+  gap: clamp(var(--space-12), 8vw, 7rem);
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+}
+
+.eyebrow,
+.section-label,
+.status-state {
+  margin: 0 0 var(--space-4);
+  color: var(--accent);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: var(--type-small);
+  font-weight: 700;
+}
+
+.hero h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.hero h1 {
+  max-width: 10ch;
+  margin-bottom: var(--space-6);
+  font-size: var(--type-display);
+  letter-spacing: -0.065em;
+  line-height: 0.93;
+}
+
+h2 {
+  max-width: 16ch;
+  font-size: var(--type-heading);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+h3 {
+  margin-bottom: var(--space-2);
+  font-size: var(--type-subheading);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.lede,
+.reading-copy,
+.install-intro > p,
+.status-intro > p,
+.roadmap-header > p,
+.safety-layout > p {
+  max-width: var(--reading-width);
+  color: var(--muted);
+  font-size: 1.125rem;
+}
+
+.actions {
+  flex-wrap: wrap;
+  margin-top: var(--space-8);
+}
+
+.button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--type-small);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.button-primary:hover {
+  background: var(--accent-strong);
+  color: var(--surface);
+}
+
+.button-quiet {
+  background: var(--surface);
+}
+
+.terminal {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--terminal-ink) 16%, transparent);
+  border-radius: var(--radius-terminal);
+  background: var(--terminal);
+  box-shadow: var(--shadow-terminal);
+  color: var(--terminal-ink);
+  transform: translateY(var(--space-6));
+}
+
+.terminal-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--terminal-ink) 14%, transparent);
+  color: color-mix(in srgb, var(--terminal-ink) 68%, transparent);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.75rem;
+}
+
+.terminal-screen {
+  margin: 0;
+  overflow-x: auto;
+  padding: clamp(var(--space-6), 4vw, var(--space-8));
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: var(--type-mono);
+  line-height: 1.75;
+}
+
+.terminal-screen span {
+  display: block;
+  white-space: pre;
+}
+
+.terminal-prompt {
+  margin-bottom: var(--space-4);
+  color: color-mix(in srgb, var(--terminal-ink) 75%, transparent);
+}
+
+.terminal-search {
+  margin-bottom: var(--space-4);
+  color: color-mix(in srgb, var(--terminal-ink) 72%, transparent);
+}
+
+.terminal-selected {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.terminal-help {
+  margin-top: var(--space-4);
+  color: color-mix(in srgb, var(--terminal-ink) 60%, transparent);
+  font-size: 0.75rem;
+}
+
+.section {
+  padding-block: var(--space-24);
+  border-top: 1px solid var(--line);
+}
+
+.section-tint {
+  background: color-mix(in srgb, var(--surface) 55%, var(--canvas));
+}
+
+.statement-layout,
+.status-layout,
+.safety-layout {
+  display: grid;
+  gap: var(--space-12);
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+
+.reading-copy p:last-child,
+.install-intro > p:last-child,
+.status-intro > p:last-child,
+.roadmap-header > p:last-child,
+.safety-layout > p:last-child {
+  margin-bottom: 0;
+}
+
+.principle-list {
+  display: grid;
+  margin-top: var(--space-16);
+  border-top: 1px solid var(--line);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.principle-list article {
+  padding: var(--space-6) var(--space-6) var(--space-2) 0;
+}
+
+.principle-list article + article {
+  border-left: 1px solid var(--line);
+  padding-left: var(--space-6);
+}
+
+.principle-list span,
+.install-steps > li > span,
+.roadmap > li > span {
+  color: var(--accent);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: var(--type-small);
+  font-weight: 700;
+}
+
+.principle-list h3 {
+  margin-top: var(--space-8);
+  font-size: 1.25rem;
+}
+
+.principle-list p,
+.status-row p,
+.roadmap p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.install-layout {
+  display: grid;
+  gap: var(--space-16);
+  grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+}
+
+.install-steps,
+.roadmap {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.install-steps {
+  gap: var(--space-8);
+}
+
+.install-steps > li {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 2rem minmax(0, 1fr);
+}
+
+.install-steps h3 {
+  font-size: 1.125rem;
+}
+
+.code-block {
+  margin: var(--space-3) 0 0;
+  overflow-x: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: var(--type-mono);
+  line-height: 1.6;
+}
+
+.support-note {
+  max-width: var(--reading-width);
+  margin-top: var(--space-16);
+}
+
+details {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding-block: var(--space-4);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+details p {
+  max-width: 60ch;
+  color: var(--muted);
+}
+
+details > .code-block {
+  margin-bottom: var(--space-4);
+}
+
+.status-panel {
+  border-top: 1px solid var(--line);
+}
+
+.status-row {
+  display: grid;
+  gap: var(--space-6);
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--line);
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+}
+
+.status-state {
+  margin: 0;
+}
+
+.status-row h3 {
+  font-size: 1.25rem;
+}
+
+.roadmap-section {
+  padding-bottom: 0;
+}
+
+.roadmap-header {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr);
+}
+
+.roadmap {
+  margin-top: var(--space-16);
+  border-top: 1px solid var(--line);
+}
+
+.roadmap > li {
+  display: grid;
+  gap: var(--space-8);
+  padding-block: var(--space-8);
+  border-bottom: 1px solid var(--line);
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+}
+
+.roadmap h3 {
+  font-size: 1.5rem;
+}
+
+.safety-layout {
+  align-items: end;
+}
+
+.safety-layout > p {
+  margin-bottom: 0;
+}
+
+.site-footer {
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.footer-content {
+  min-height: auto;
+  color: var(--muted);
+  font-size: var(--type-small);
+}
+
+.footer-content p {
+  margin: 0;
+}
+
+.footer-content strong {
+  color: var(--ink);
+}
+
+.footer-content a {
+  font-weight: 700;
+}
+
+@media (max-width: 56.25rem) {
+  .hero-grid,
+  .statement-layout,
+  .status-layout,
+  .safety-layout,
+  .install-layout,
+  .roadmap-header {
+    grid-template-columns: 1fr;
+  }
+
+  .terminal {
+    transform: none;
+  }
+
+  .principle-list {
+    grid-template-columns: 1fr;
+  }
+
+  .principle-list article,
+  .principle-list article + article {
+    padding: var(--space-6) 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .principle-list article:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .masthead,
+  .footer-content {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--space-4);
+  }
+
+  .masthead nav {
+    gap: var(--space-3);
+  }
+
+  .hero {
+    padding-block: var(--space-16) var(--space-16);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.75rem, 15vw, 4.5rem);
+  }
+
+  .lede,
+  .reading-copy,
+  .install-intro > p,
+  .status-intro > p,
+  .roadmap-header > p,
+  .safety-layout > p {
+    font-size: var(--type-body);
+  }
+
+  .status-row,
+  .roadmap > li {
+    gap: var(--space-3);
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+  }
+}
