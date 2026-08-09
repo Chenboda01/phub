@@ -775,4 +775,3 @@ No repeated `cd`.
 No unnecessary friction.
 
 > **Find it. Open it. Work.**
-
