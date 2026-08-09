@@ -780,4 +780,3 @@ Feature count
 phub should remain a tool that one developer can understand.
 
 > **Find it. Open it. Work.**
-

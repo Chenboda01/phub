@@ -2193,4 +2193,3 @@ phub should not try to become the tool that does everything.
 It should become the tool that gets you to the right project and the right tool immediately.
 
 > **Find it. Open it. Work.**
-
