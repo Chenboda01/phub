@@ -1,0 +1,3 @@
+#compdef phub
+
+_arguments '--auto-update[Pull the latest source, rebuild, and start phub]'
