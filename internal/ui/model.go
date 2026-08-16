@@ -116,6 +116,14 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) updateKey(key tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	if m.themeMenu {
+		return m.updateThemeMenu(key.Keystroke())
+	}
+	if key.Keystroke() == "ctrl+p" {
+		m.themeMenu = true
+		m.notice = ""
+		return m, nil
+	}
 	if m.terminal != nil {
 		if err := m.terminal.SendKey(key.Key()); err != nil {
 			m.notice = fmt.Sprintf("Could not send terminal input: %v", err)
@@ -128,17 +136,10 @@ func (m model) updateKey(key tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if m.startup {
 		return m.updateScopeMenu(key.Keystroke())
 	}
-	if m.themeMenu {
-		return m.updateThemeMenu(key.Keystroke())
-	}
 
 	switch key.Keystroke() {
 	case "ctrl+c", "q":
 		return m, tea.Quit
-	case "ctrl+p":
-		m.themeMenu = true
-		m.notice = ""
-		return m, nil
 	case "R", "r", "shift+r":
 		return m.beginProjectLoad(m.scope)
 	case "up", "k":

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -130,5 +131,98 @@ func TestModelRendersThemeDropdown_whenCtrlPIsPressed(t *testing.T) {
 	}
 	if strings.Contains(content, "1 Red Background") {
 		t.Fatalf("theme dropdown still requires numeric keys:\n%s", content)
+	}
+}
+
+func TestModelOpensThemePickerOverTerminal_whenCtrlPIsPressed(t *testing.T) {
+	// Given
+	session := &fakeTerminalSession{readErr: errors.New("still running")}
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = session
+
+	// When
+	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: 'p', Mod: tea.ModCtrl}))
+
+	// Then
+	if !next.themeMenu {
+		t.Fatal("Ctrl+P did not open the theme picker while the terminal is active")
+	}
+	if next.terminal == nil {
+		t.Fatal("opening the theme picker closed the embedded terminal")
+	}
+	if len(session.keys) != 0 {
+		t.Fatalf("Ctrl+P was forwarded to the shell: %v", session.keys)
+	}
+}
+
+func TestModelRendersThemePickerOverTerminal_whenTerminalIsActive(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = &fakeTerminalSession{}
+	current.themeMenu = true
+
+	// When
+	content := current.render()
+
+	// Then
+	if !strings.Contains(content, "Choose a theme") {
+		t.Fatalf("theme dropdown heading missing while terminal is active:\n%s", content)
+	}
+}
+
+func TestModelKeepsTerminalRunning_whenThemePickerIsCancelled(t *testing.T) {
+	// Given
+	session := &fakeTerminalSession{readErr: errors.New("still running")}
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = session
+	current.themeMenu = true
+
+	// When
+	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEscape}))
+
+	// Then
+	if next.themeMenu {
+		t.Fatal("theme picker remained open after Esc")
+	}
+	if next.terminal == nil {
+		t.Fatal("cancelling the theme picker closed the embedded terminal")
+	}
+}
+
+func TestModelAppliesThemeAndKeepsTerminal_whenEnterIsPressed(t *testing.T) {
+	// Given
+	session := &fakeTerminalSession{readErr: errors.New("still running")}
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = session
+	current.themeMenu = true
+
+	// When
+	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}))
+
+	// Then
+	if next.themeMenu {
+		t.Fatal("theme picker remained open after Enter")
+	}
+	if next.terminal == nil {
+		t.Fatal("applying a theme closed the embedded terminal")
+	}
+	if next.theme.name != "Red Background" {
+		t.Fatalf("theme = %q, want Red Background", next.theme.name)
+	}
+}
+
+func TestModelDoesNotForwardKeys_whenThemePickerIsOpenOverTerminal(t *testing.T) {
+	// Given
+	session := &fakeTerminalSession{readErr: errors.New("still running")}
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = session
+	current.themeMenu = true
+
+	// When
+	_, _ = updateModel(t, current, tea.KeyPressMsg(tea.Key{Text: "e", Code: 'e'}))
+
+	// Then
+	if len(session.keys) != 0 {
+		t.Fatalf("keys were forwarded to the shell while the theme picker was open: %v", session.keys)
 	}
 }

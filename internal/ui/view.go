@@ -17,7 +17,7 @@ func (m model) View() tea.View {
 	case foregroundMode, comboMode:
 		view.ForegroundColor = m.theme.foreground
 	}
-	if m.terminal != nil {
+	if m.terminal != nil && !m.themeMenu {
 		x, y := m.terminal.CursorPosition()
 		view.Cursor = tea.NewCursor(x, y+1)
 	}
@@ -25,7 +25,7 @@ func (m model) View() tea.View {
 }
 
 func (m model) render() string {
-	if m.terminal != nil {
+	if m.terminal != nil && !m.themeMenu {
 		return m.terminalView()
 	}
 	if m.startup {

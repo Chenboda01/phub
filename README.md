@@ -312,7 +312,7 @@ Enter      Apply selected preset
 Esc        Cancel
 ```
 
-`Ctrl+P` opens a dropdown; it does not change the theme by itself. The 18 presets cover Red, Orange, Yellow, Green, Blue, and Purple, with a Background, Theme, and Combo option for each color.
+`Ctrl+P` opens a dropdown; it does not change the theme by itself. It also works from inside the embedded terminal, so the theme can be changed without leaving the project shell. The 18 presets cover Red, Orange, Yellow, Green, Blue, and Purple, with a Background, Theme, and Combo option for each color.
 
 Keyboard bindings should eventually be configurable.
 
@@ -683,6 +683,7 @@ y → yazi
 Enter  → open phub's embedded terminal in the selected project
 exit   → close the project terminal and return to phub
 Ctrl+D → close the project terminal and return to phub
+Ctrl+P → open the theme picker without leaving the terminal
 ```
 
 phub should allow users to replace these tools through configuration.
