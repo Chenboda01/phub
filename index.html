@@ -47,9 +47,9 @@
           <figure class="terminal" aria-label="Current phub prototype output">
             <figcaption class="terminal-bar">
               <span>phub</span>
-              <span>0.0.5 prototype</span>
+              <span>current prototype</span>
             </figcaption>
-            <pre class="terminal-screen"><code><span class="terminal-prompt">$ phub</span><span class="terminal-search">Search projects... (press /)</span><span class="terminal-row terminal-selected">&gt; Aster</span><span class="terminal-row">  Dune</span><span class="terminal-row">  Beacon</span><span class="terminal-row">  Cobalt</span><span class="terminal-help">j/k or arrows: navigate | enter: open | R refresh | ctrl+p themes | q: quit</span></code></pre>
+            <pre class="terminal-screen"><code><span class="terminal-prompt">$ phub</span><span class="terminal-search">Search projects... (press /)</span><span class="terminal-row terminal-selected">&gt; Aster        Python      main   ● 3 changes</span><span class="terminal-row">  Dune         Go          main   ✓ clean</span><span class="terminal-row">  Beacon       Python      dev    ✓ clean</span><span class="terminal-row">  Cobalt       TypeScript  dev    ✓ clean</span><span class="terminal-help">j/k or arrows: navigate | enter: open | R refresh | ctrl+p themes | q: quit</span></code></pre>
           </figure>
         </div>
       </section>
@@ -144,15 +144,15 @@ phub</code></pre>
             <div class="status-row">
               <span class="status-state">Implemented</span>
               <div>
-                <h3>0.0.1 + 0.0.2 + 0.0.5 prototype</h3>
-                <p>Keyboard navigation and responsive terminal sizing now operate on projects discovered from the home directory or configured roots. R rescans those roots, Enter launches the selected project's shell with an explicit working directory, and Ctrl+P opens an arrow-navigated dropdown with 18 opaque color presets.</p>
+                <h3>0.0.1 + 0.0.2 + 0.0.3 + 0.0.5 prototype</h3>
+                <p>Keyboard navigation and responsive terminal sizing operate on projects discovered from the home directory or configured roots. Each row fills in language and Git state asynchronously, R rescans those roots, Enter launches the selected project's shell in place, and Ctrl+P opens an arrow-navigated dropdown with 18 opaque color presets.</p>
               </div>
             </div>
             <div class="status-row">
               <span class="status-state">Planned</span>
               <div>
-                <h3>Metadata and search</h3>
-                <p>Language detection, Git status, search, persistence, and TOML configuration remain future milestones.</p>
+                <h3>Search and tool handoff</h3>
+                <p>Fast filtering, one-key tool launches, persistence, and TOML configuration remain future milestones.</p>
               </div>
             </div>
           </div>
@@ -180,10 +180,17 @@ phub</code></pre>
             </div>
           </li>
           <li>
-            <span>0.0.3-0.0.4</span>
+            <span>0.0.3</span>
             <div>
-              <h3>Metadata and search</h3>
-              <p>Planned: useful project state at a glance and fast filtering.</p>
+              <h3>Metadata</h3>
+              <p>Available now: language detection and Git state load asynchronously on each row, and refresh after a project shell exits.</p>
+            </div>
+          </li>
+          <li>
+            <span>0.0.4</span>
+            <div>
+              <h3>Search</h3>
+              <p>Planned: fast filtering across name, path, and language.</p>
             </div>
           </li>
           <li>
