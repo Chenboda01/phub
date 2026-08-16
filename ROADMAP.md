@@ -185,6 +185,10 @@ Pressing `r` or `R` discovers projects added since startup.
 
 # Milestone 0.0.3 — Project Metadata
 
+## Status
+
+Implemented.
+
 ## Goal
 
 Make the project list useful at a glance.
@@ -283,7 +287,7 @@ Esc clears search and returns to the full project list.
 
 ## Status
 
-Implemented with an embedded PTY-backed terminal and theme presets. Post-exit metadata refresh remains deferred until the metadata milestone exists.
+Implemented with an embedded PTY-backed terminal and theme presets. Git and language metadata reload asynchronously after the terminal exits.
 
 ## Goal
 

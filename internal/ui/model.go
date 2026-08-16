@@ -2,10 +2,13 @@ package ui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 
 	tea "charm.land/bubbletea/v2"
+	"phub/internal/git"
+	"phub/internal/metadata"
 )
 
 type model struct {
@@ -29,6 +32,8 @@ type model struct {
 	startingTerminal bool
 	terminalContext  context.Context
 	startTerminal    terminalStarter
+	metadata         map[string]metadata.Info
+	loadMetadata     metadataLoader
 }
 
 type projectsRefreshedMsg struct {
@@ -55,6 +60,7 @@ func newModel(projects []Project, shell string) model {
 		theme:           defaultTheme,
 		terminalContext: context.Background(),
 		startTerminal:   defaultTerminalStarter,
+		loadMetadata:    defaultMetadataLoader,
 	}
 }
 
@@ -88,6 +94,16 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.session == m.terminal && msg.err != nil {
 			m.notice = fmt.Sprintf("Could not resize terminal: %v", msg.err)
 		}
+	case projectsMetadataMsg:
+		m.metadata = msg.infos
+		if msg.err != nil {
+			switch {
+			case errors.Is(msg.err, git.ErrNotFound):
+				m.notice = "git executable not found; showing languages only"
+			default:
+				m.notice = fmt.Sprintf("Could not load project metadata: %v", msg.err)
+			}
+		}
 	case projectsRefreshedMsg:
 		m.refreshing = false
 		if msg.err != nil {
@@ -110,6 +126,7 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.notice = fmt.Sprintf("Refreshed %d projects.", len(m.projects))
 		}
+		return m, m.metadataCommand()
 	}
 
 	return m, nil

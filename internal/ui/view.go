@@ -5,11 +5,57 @@ import (
 	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 )
 
 const compactWidth = 64
 
 var Version = "dev"
+
+type metadataColumns struct {
+	loaded        bool
+	nameWidth     int
+	languageWidth int
+	branchWidth   int
+}
+
+func (m model) metadataColumns(names []string) metadataColumns {
+	if len(m.metadata) == 0 {
+		return metadataColumns{}
+	}
+	var columns metadataColumns
+	columns.loaded = true
+	for index, current := range m.projects {
+		columns.nameWidth = max(columns.nameWidth, ansi.StringWidth(names[index]))
+		info, ok := m.metadata[current.Path]
+		if !ok {
+			continue
+		}
+		columns.languageWidth = max(columns.languageWidth, ansi.StringWidth(info.Language))
+		branch := info.Git.Branch
+		if branch == "" {
+			branch = "-"
+		}
+		columns.branchWidth = max(columns.branchWidth, ansi.StringWidth(branch))
+	}
+	return columns
+}
+
+func (m model) metadataRow(path string, columns metadataColumns) string {
+	info, ok := m.metadata[path]
+	if !ok {
+		return ""
+	}
+	branch := info.Git.Branch
+	if branch == "" {
+		branch = "-"
+	}
+	return info.Language +
+		strings.Repeat(" ", columns.languageWidth-ansi.StringWidth(info.Language)+2) +
+		branch +
+		strings.Repeat(" ", columns.branchWidth-ansi.StringWidth(branch)+2) +
+		gitStatusText(info.Git)
+}
 
 func versionSuffix(base string, width int) string {
 	suffix := " · phub " + Version
@@ -196,6 +242,7 @@ func (m model) writeProjects(content *strings.Builder) {
 	}
 
 	names := projectDisplayNames(m.projects)
+	columns := m.metadataColumns(names)
 
 	visible := len(m.projects)
 	if m.height > 0 {
@@ -226,6 +273,10 @@ func (m model) writeProjects(content *strings.Builder) {
 			content.WriteString("  ")
 		}
 		content.WriteString(names[index])
+		if columns.loaded {
+			content.WriteString(strings.Repeat(" ", columns.nameWidth-ansi.StringWidth(names[index])+2))
+			content.WriteString(m.metadataRow(m.projects[index].Path, columns))
+		}
 		content.WriteByte('\n')
 	}
 

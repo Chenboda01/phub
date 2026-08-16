@@ -131,5 +131,5 @@ func (m model) finishTerminal(notice string) (tea.Model, tea.Cmd) {
 	} else {
 		m.notice = notice
 	}
-	return m, nil
+	return m, m.metadataCommand()
 }

@@ -165,6 +165,8 @@ Discovery uses canonical paths, skips missing or unreadable roots gracefully, pr
 
 When two discovered projects share a name, the project list shows the parent directory to keep them apart, for example `phub (Projects)` and `phub (home)`.
 
+After loading, phub fills in language and Git metadata asynchronously so startup stays instant. Each row shows the primary language, current branch, and working-tree state: `✓ clean`, `● N modified`, or `? N untracked`. Metadata failures never hide a project, and a missing Git executable produces a warning instead of an error. The metadata refreshes after a project shell exits, so changes made inside the embedded terminal appear immediately.
+
 At startup, phub asks which projects to load. **GitHub only** is selected by default; press Enter to load repositories with a local `github.com` remote. Move down and press Enter to load **all local projects** instead. GitHub-only filtering reads local Git metadata with explicit `git -C <project> remote -v` arguments, does not contact GitHub, and does not modify repositories.
 
 Press `r` or `R` to scan the home directory (or the roots from `PHUB_SCAN_ROOTS`) again and replace the project list while preserving the selected scope. The refresh remains read-only. TOML configuration, manual project registration, metadata, and search remain planned milestones. Pressing Enter on a discovered project now opens phub's embedded terminal with the configured shell in that project's working directory. Type `exit` or press `Ctrl+D` to return to phub.
