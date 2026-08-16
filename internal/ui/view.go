@@ -11,6 +11,14 @@ const compactWidth = 64
 
 var Version = "dev"
 
+func versionSuffix(base string, width int) string {
+	suffix := " · phub " + Version
+	if width > 0 && utf8.RuneCountInString(base)+utf8.RuneCountInString(suffix) > width {
+		return base
+	}
+	return base + suffix
+}
+
 func (m model) View() tea.View {
 	view := tea.NewView(m.paintBackground(m.render()))
 	view.AltScreen = true
@@ -165,11 +173,17 @@ func (m model) compactView() string {
 		content.WriteByte('\n')
 	}
 	if m.themeMenu {
-		content.WriteString("\nup/down | enter select | esc cancel\n")
+		content.WriteString("\n")
+		content.WriteString(versionSuffix("up/down | enter select | esc cancel", m.width))
+		content.WriteString("\n")
 	} else if m.width > 0 && m.width < 36 {
-		content.WriteString("\nj/k | enter | R | ctrl+p | q\n")
+		content.WriteString("\n")
+		content.WriteString(versionSuffix("j/k | enter | R | ctrl+p | q", m.width))
+		content.WriteString("\n")
 	} else {
-		content.WriteString("\nj/k | enter | R refresh | ctrl+p | q\n")
+		content.WriteString("\n")
+		content.WriteString(versionSuffix("j/k | enter | R refresh | ctrl+p | q", m.width))
+		content.WriteString("\n")
 	}
 
 	return content.String()

@@ -276,6 +276,45 @@ func TestModelShowsBuildVersion_whenProjectListIsRendered(t *testing.T) {
 	}
 }
 
+func TestModelShowsBuildVersion_whenCompactViewIsRendered(t *testing.T) {
+	// Given
+	previous := Version
+	Version = "abc1234"
+	t.Cleanup(func() { Version = previous })
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 60
+
+	// When
+	content := current.render()
+
+	// Then
+	if !strings.Contains(content, "phub abc1234") {
+		t.Fatalf("compact view does not show the build version:\n%s", content)
+	}
+}
+
+func TestModelOmitsBuildVersion_whenCompactFooterWouldOverflow(t *testing.T) {
+	// Given
+	previous := Version
+	Version = "abc1234"
+	t.Cleanup(func() { Version = previous })
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 40
+
+	// When
+	content := current.render()
+
+	// Then
+	if strings.Contains(content, "phub abc1234") {
+		t.Fatalf("compact view shows the build version beyond the terminal width:\n%s", content)
+	}
+	for _, line := range strings.Split(content, "\n") {
+		if width := utf8.RuneCountInString(line); width > current.width {
+			t.Fatalf("line width = %d, want at most %d: %q", width, current.width, line)
+		}
+	}
+}
+
 func updateModel(t *testing.T, current model, message tea.Msg) (model, tea.Cmd) {
 	t.Helper()
 
