@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "--auto-update" {
+		os.Exit(runAutoUpdate(os.Stdout, os.Stderr))
+	}
+
 	ui.Version = buildVersion()
 	program := tea.NewProgram(ui.NewWithLoader(os.Getenv("SHELL"), func(scope ui.ProjectScope) ([]ui.Project, error) {
 		return discoverProjectsForScope(context.Background(), scope)
