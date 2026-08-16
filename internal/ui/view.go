@@ -10,7 +10,7 @@ import (
 const compactWidth = 64
 
 func (m model) View() tea.View {
-	view := tea.NewView(m.render())
+	view := tea.NewView(m.paintBackground(m.render()))
 	view.AltScreen = true
 	view.BackgroundColor = m.theme.background
 	switch m.theme.mode {

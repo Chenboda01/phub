@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func TestModelEntersThemeMenu_whenCtrlPIsPressed(t *testing.T) {
@@ -224,5 +225,71 @@ func TestModelDoesNotForwardKeys_whenThemePickerIsOpenOverTerminal(t *testing.T)
 	// Then
 	if len(session.keys) != 0 {
 		t.Fatalf("keys were forwarded to the shell while the theme picker was open: %v", session.keys)
+	}
+}
+
+func TestModelPaintsFullWidthThemeBackground_whenViewIsRendered(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 40
+	current.height = 6
+
+	// When
+	content := current.paintBackground("phub\n\n> Alpha")
+
+	// Then
+	for _, line := range strings.Split(content, "\n") {
+		if !strings.HasPrefix(line, "\x1b[48;2;") {
+			t.Fatalf("line does not start with a background fill: %q", line)
+		}
+		if width := ansi.StringWidth(line); width != 40 {
+			t.Fatalf("painted line width = %d, want 40: %q", width, line)
+		}
+	}
+}
+
+func TestModelReappliesBackgroundAfterStyleResets_whenLineContainsStyledRuns(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 24
+
+	// When
+	content := current.paintBackground("\x1b[1mbold\x1b[0m then plain")
+
+	// Then
+	line := strings.Split(content, "\n")[0]
+	if !strings.Contains(line, "\x1b[0m\x1b[48;2;") {
+		t.Fatalf("background fill was not reapplied after style reset: %q", line)
+	}
+	if width := ansi.StringWidth(line); width != 24 {
+		t.Fatalf("painted line width = %d, want 24: %q", width, line)
+	}
+}
+
+func TestModelPadsWideCharactersToFullWidth_whenContentUsesCJK(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 12
+
+	// When
+	content := current.paintBackground("東京")
+
+	// Then
+	line := strings.Split(content, "\n")[0]
+	if width := ansi.StringWidth(line); width != 12 {
+		t.Fatalf("painted CJK line width = %d, want 12: %q", width, line)
+	}
+}
+
+func TestModelDoesNotPaintBackground_whenTerminalWidthIsUnknown(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+
+	// When
+	content := current.paintBackground("phub")
+
+	// Then
+	if content != "phub" {
+		t.Fatalf("content = %q, want unchanged", content)
 	}
 }
