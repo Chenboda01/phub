@@ -120,7 +120,11 @@ cd phub</code></pre>
             <summary>Update phub to the latest version</summary>
             <p>phub is in active development and changes quickly. Update it daily to keep the latest fixes and features.</p>
             <pre class="code-block" aria-label="Update phub automatically"><code>phub --auto-update</code></pre>
-            <p>The updater needs <code>git</code> and <code>go</code> on your shell path. On fish, add your Go bin directory first: <code>fish_add_path (go env GOPATH)/bin</code>.</p>
+            <p>The updater needs <code>git</code> and <code>go</code> on your shell path. On fish, add your Go bin directory first: <code>fish_add_path (go env GOPATH)/bin</code>. The manual steps are:</p>
+            <pre class="code-block" aria-label="Update phub to the latest version"><code>cd ~/phub
+git pull
+go build -o ~/go/bin/phub ./cmd/phub
+phub</code></pre>
           </details>
           <details>
             <summary>Command not found after installation?</summary>
