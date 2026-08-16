@@ -181,6 +181,8 @@ func (m model) writeProjects(content *strings.Builder) {
 		return
 	}
 
+	names := projectDisplayNames(m.projects)
+
 	visible := len(m.projects)
 	if m.height > 0 {
 		available := m.height - 7
@@ -209,7 +211,7 @@ func (m model) writeProjects(content *strings.Builder) {
 		} else {
 			content.WriteString("  ")
 		}
-		content.WriteString(m.projects[index].Name)
+		content.WriteString(names[index])
 		content.WriteByte('\n')
 	}
 
