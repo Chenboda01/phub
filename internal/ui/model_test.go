@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -26,7 +27,7 @@ func TestModelMovesSelection_whenNavigationKeyPressed(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// Given
-			current := newModel()
+			current := newModel(testProjects(), "/bin/sh")
 			current.selected = test.selected
 
 			// When
@@ -42,7 +43,7 @@ func TestModelMovesSelection_whenNavigationKeyPressed(t *testing.T) {
 
 func TestModelEnablesSearchPlaceholder_whenSlashPressed(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 
 	// When
 	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Text: "/", Code: '/'}))
@@ -55,7 +56,7 @@ func TestModelEnablesSearchPlaceholder_whenSlashPressed(t *testing.T) {
 
 func TestModelClearsSearchPlaceholder_whenEscapePressed(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 	current.searching = true
 	current.notice = "Search is coming soon."
 
@@ -68,22 +69,51 @@ func TestModelClearsSearchPlaceholder_whenEscapePressed(t *testing.T) {
 	}
 }
 
-func TestModelShowsOpenPlaceholder_whenEnterPressed(t *testing.T) {
+func TestModelStartsEmbeddedTerminal_whenEnterPressed(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
+	current.startTerminal = func(context.Context, string, string, int, int) (terminalSession, error) {
+		return nil, nil
+	}
 
 	// When
-	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}))
+	next, command := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}))
 
 	// Then
-	if next.notice != "Opening Forge is planned for a later milestone." {
-		t.Fatalf("notice = %q", next.notice)
+	if command == nil {
+		t.Fatal("Enter returned no terminal start command")
+	}
+	if !next.startingTerminal {
+		t.Fatal("Enter did not enter terminal startup state")
+	}
+}
+
+func TestModelStartsSelectedProjectTerminal_whenEnterPressed(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.selected = 1
+	var startedPath string
+	current.startTerminal = func(_ context.Context, _ string, path string, _, _ int) (terminalSession, error) {
+		startedPath = path
+		return nil, nil
+	}
+
+	// When
+	_, command := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}))
+	if command == nil {
+		t.Fatal("Enter returned no terminal start command")
+	}
+	command()
+
+	// Then
+	if startedPath != testProjects()[1].Path {
+		t.Fatalf("terminal project path = %q, want %q", startedPath, testProjects()[1].Path)
 	}
 }
 
 func TestModelQuits_whenQPressed(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 
 	// When
 	_, command := updateModel(t, current, tea.KeyPressMsg(tea.Key{Text: "q", Code: 'q'}))
@@ -100,7 +130,7 @@ func TestModelQuits_whenQPressed(t *testing.T) {
 
 func TestModelTracksTerminalSize_whenResized(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 
 	// When
 	next, _ := updateModel(t, current, tea.WindowSizeMsg{Width: 32, Height: 12})
@@ -111,9 +141,52 @@ func TestModelTracksTerminalSize_whenResized(t *testing.T) {
 	}
 }
 
+func TestModelRendersTerminalChrome_whenEmbeddedTerminalIsActive(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.width = 48
+	current.height = 12
+	current.terminal = &fakeTerminalSession{}
+	current.terminalProject = "Alpha"
+
+	// When
+	content := current.render()
+
+	// Then
+	for _, expected := range []string{
+		"phub / Alpha",
+		"shell: sh",
+		"Ctrl+D return",
+		"Ctrl+C interrupt",
+		"\x1b[1m",
+		"\x1b[2m",
+	} {
+		if !strings.Contains(content, expected) {
+			t.Fatalf("terminal chrome missing %q:\n%s", expected, content)
+		}
+	}
+}
+
+func TestModelOffsetsTerminalCursorBelowTerminalHeader(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+	current.terminal = &fakeTerminalSession{cursorX: 7, cursorY: 3}
+
+	// When
+	view := current.View()
+
+	// Then
+	if view.Cursor == nil {
+		t.Fatal("terminal cursor was not configured")
+	}
+	if view.Cursor.X != 7 || view.Cursor.Y != 4 {
+		t.Fatalf("cursor = (%d, %d), want (7, 4)", view.Cursor.X, view.Cursor.Y)
+	}
+}
+
 func TestModelKeepsSelectedProjectVisible_whenTerminalHeightShrinks(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 	current.selected = 3
 	current.height = 8
 
@@ -121,16 +194,16 @@ func TestModelKeepsSelectedProjectVisible_whenTerminalHeightShrinks(t *testing.T
 	content := current.render()
 
 	// Then
-	if !strings.Contains(content, "> Website") {
+	if !strings.Contains(content, "> Gamma") {
 		t.Fatalf("rendered content does not show the selected project:\n%s", content)
 	}
 }
 
 func TestModelAvoidsOverflow_whenTerminalIsNarrow(t *testing.T) {
 	// Given
-	current := newModel()
+	current := newModel(testProjects(), "/bin/sh")
 	current.width = 40
-	current.notice = "Opening Forge is planned for a later milestone."
+	current.notice = "Opening Alpha is planned for a later milestone."
 
 	// When
 	content := current.render()
@@ -139,6 +212,50 @@ func TestModelAvoidsOverflow_whenTerminalIsNarrow(t *testing.T) {
 	for _, line := range strings.Split(content, "\n") {
 		if width := utf8.RuneCountInString(line); width > current.width {
 			t.Fatalf("line width = %d, want at most %d: %q", width, current.width, line)
+		}
+	}
+}
+
+func TestModelShowsEmptyState_whenNoProjectsWereDiscovered(t *testing.T) {
+	// Given
+	current := newModel(nil, "/bin/sh")
+
+	// When
+	content := current.render()
+
+	// Then
+	if !strings.Contains(content, "No projects discovered.") {
+		t.Fatalf("rendered content does not show the empty state:\n%s", content)
+	}
+}
+
+func TestModelShowsNoOpenNotice_whenEnterPressedWithoutProjects(t *testing.T) {
+	// Given
+	current := newModel(nil, "/bin/sh")
+
+	// When
+	next, _ := updateModel(t, current, tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}))
+
+	// Then
+	if next.notice != "No projects are available to open." {
+		t.Fatalf("notice = %q", next.notice)
+	}
+}
+
+func TestModelViewUsesOpaqueBackground_forEveryThemePreset(t *testing.T) {
+	// Given
+	current := newModel(testProjects(), "/bin/sh")
+
+	// When / Then
+	for _, preset := range themes {
+		current.theme = preset
+		view := current.View()
+		if view.BackgroundColor == nil {
+			t.Fatalf("theme %q has no background color", preset.name)
+		}
+		foregroundSet := view.ForegroundColor != nil
+		if wantForeground := preset.mode != backgroundMode; foregroundSet != wantForeground {
+			t.Fatalf("theme %q foreground set = %t, want %t", preset.name, foregroundSet, wantForeground)
 		}
 	}
 }
@@ -153,4 +270,13 @@ func updateModel(t *testing.T, current model, message tea.Msg) (model, tea.Cmd) 
 	}
 
 	return updated, command
+}
+
+func testProjects() []Project {
+	return []Project{
+		{Name: "Alpha", Path: "/tmp/Alpha"},
+		{Name: "Delta", Path: "/tmp/Delta"},
+		{Name: "Beta", Path: "/tmp/Beta"},
+		{Name: "Gamma", Path: "/tmp/Gamma"},
+	}
 }
