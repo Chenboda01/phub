@@ -802,6 +802,8 @@ phub --help
 
 The CLI should remain useful even when the interactive TUI is unavailable. `phub --auto-update` pulls the latest source from `~/phub`, rebuilds the installed binary, and starts the updated phub. The source directory can be overridden with `PHUB_SOURCE_DIR`.
 
+Fish users can enable flag completion by copying `completions/phub.fish` into `~/.config/fish/completions/`.
+
 ---
 
 # Technology
