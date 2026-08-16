@@ -52,7 +52,7 @@ func newAutoUpdater(stdout io.Writer, stderr io.Writer) (autoUpdater, error) {
 	if err != nil {
 		return autoUpdater{}, fmt.Errorf("git executable not found in $PATH: %w", err)
 	}
-	goPath, err := exec.LookPath("go")
+	goPath, err := findGo()
 	if err != nil {
 		return autoUpdater{}, fmt.Errorf("go executable not found in $PATH; install Go or add its bin directory to your shell PATH (fish: fish_add_path <go-bin-dir>): %w", err)
 	}
@@ -65,6 +65,30 @@ func newAutoUpdater(stdout io.Writer, stderr io.Writer) (autoUpdater, error) {
 		gitPath:    gitPath,
 		goPath:     goPath,
 	}, nil
+}
+
+func findGo() (string, error) {
+	if path, err := exec.LookPath("go"); err == nil {
+		return path, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err == nil {
+		for _, directory := range []string{
+			filepath.Join(home, ".local", "go", "bin"),
+			filepath.Join(home, "go", "bin"),
+		} {
+			candidate := filepath.Join(directory, "go")
+			if info, statErr := os.Stat(candidate); statErr == nil && !info.IsDir() {
+				return candidate, nil
+			}
+		}
+	}
+	if info, err := os.Stat("/usr/local/go/bin/go"); err == nil && !info.IsDir() {
+		return "/usr/local/go/bin/go", nil
+	}
+
+	return "", errors.New("go executable not found")
 }
 
 func (u autoUpdater) run() (int, error) {

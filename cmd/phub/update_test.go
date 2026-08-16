@@ -160,6 +160,35 @@ func TestNewAutoUpdater_reportsMissingGit(t *testing.T) {
 	}
 }
 
+func TestNewAutoUpdater_findsGoInCommonLocation_whenMissingFromPath(t *testing.T) {
+	// Given
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	goBin := filepath.Join(home, ".local", "go", "bin")
+	if err := os.MkdirAll(goBin, 0o700); err != nil {
+		t.Fatalf("create go bin directory: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(goBin, "go"), []byte("#!/bin/sh\nexit 0\n"), 0o700); err != nil {
+		t.Fatalf("write fake go: %v", err)
+	}
+	gitOnlyDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(gitOnlyDir, "git"), []byte("#!/bin/sh\nexit 0\n"), 0o700); err != nil {
+		t.Fatalf("write fake git: %v", err)
+	}
+	t.Setenv("PATH", gitOnlyDir)
+
+	// When
+	updater, err := newAutoUpdater(&bytes.Buffer{}, &bytes.Buffer{})
+
+	// Then
+	if err != nil {
+		t.Fatalf("newAutoUpdater() error = %v", err)
+	}
+	if want := filepath.Join(goBin, "go"); updater.goPath != want {
+		t.Fatalf("goPath = %q, want %q", updater.goPath, want)
+	}
+}
+
 func fakeTools(t *testing.T) string {
 	t.Helper()
 	binDir := t.TempDir()
