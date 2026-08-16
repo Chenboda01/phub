@@ -117,6 +117,14 @@ cd phub</code></pre>
         </div>
         <div class="container support-note">
           <details>
+            <summary>Update phub to the latest version</summary>
+            <p>phub is in active development and changes quickly. Update it daily to keep the latest fixes and features.</p>
+            <pre class="code-block" aria-label="Update phub to the latest version"><code>cd ~/phub
+git pull
+go build -o ~/go/bin/phub ./cmd/phub
+phub</code></pre>
+          </details>
+          <details>
             <summary>Command not found after installation?</summary>
             <p>Go installs commands into its bin directory. Add it to your shell path, then open a new terminal.</p>
             <pre class="code-block" aria-label="Add Go bin directory to Fish path"><code>fish_add_path (go env GOPATH)/bin</code></pre>
