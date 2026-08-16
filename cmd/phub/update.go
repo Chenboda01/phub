@@ -50,11 +50,11 @@ func newAutoUpdater(stdout io.Writer, stderr io.Writer) (autoUpdater, error) {
 	}
 	gitPath, err := exec.LookPath("git")
 	if err != nil {
-		return autoUpdater{}, fmt.Errorf("git executable not found: %w", err)
+		return autoUpdater{}, fmt.Errorf("git executable not found in $PATH: %w", err)
 	}
 	goPath, err := exec.LookPath("go")
 	if err != nil {
-		return autoUpdater{}, fmt.Errorf("go executable not found: %w", err)
+		return autoUpdater{}, fmt.Errorf("go executable not found in $PATH; install Go or add its bin directory to your shell PATH (fish: fish_add_path <go-bin-dir>): %w", err)
 	}
 
 	return autoUpdater{
