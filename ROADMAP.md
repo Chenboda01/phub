@@ -38,11 +38,11 @@ Do not build the entire roadmap in one pass.
 # 3. Version Plan
 
 ```text
-0.0.1   TUI prototype
-0.0.2   Project discovery
+0.0.1   TUI prototype (implemented)
+0.0.2   Project discovery (implemented)
 0.0.3   Git and language metadata
 0.0.4   Search
-0.0.5   Project launching
+0.0.5   Project launching and theme presets (implemented)
 0.0.6   Tool integrations
 0.0.7   Favorites and recent projects
 0.0.8   Configuration and persistence polish
@@ -68,7 +68,7 @@ Use a small hardcoded project list.
 * `j` / `k` navigation
 * Arrow-key navigation
 * `/` search input placeholder
-* `Enter` action placeholder
+* `Enter` action placeholder (replaced by real shell launch in 0.0.5)
 * `q` quit
 * Responsive terminal resizing
 * Help text
@@ -79,10 +79,10 @@ Example:
 ┌─ phub ───────────────────────────────────────────┐
 │ Search projects...                              │
 ├─────────────────────────────────────────────────┤
-│ > Forge                                         │
-│   phub                                          │
-│   ScreenBot                                     │
-│   Website                                       │
+│ > Aster                                         │
+│   Dune                                          │
+│   Beacon                                     │
+│   Cobalt                                       │
 ├─────────────────────────────────────────────────┤
 │ ↑/↓ navigate · enter open · / search · q quit  │
 └─────────────────────────────────────────────────┘
@@ -109,6 +109,10 @@ Example:
 
 # Milestone 0.0.2 — Project Discovery
 
+## Status
+
+Implemented.
+
 ## Goal
 
 Replace fake projects with real project scanning.
@@ -123,6 +127,10 @@ Support configured scan roots such as:
 ~/Python
 ```
 
+When `PHUB_SCAN_ROOTS` is not set, the default scan root is the user's home directory. At startup, the TUI presents a scope chooser with **GitHub only** selected by default. Press Enter to load projects with a local `github.com` remote, or move to **All local projects** and press Enter to keep every discovered project. Press `r` or `R` to scan the default or configured roots again while preserving the selected scope.
+
+The default roots can be overridden with `PHUB_SCAN_ROOTS`. Set `PHUB_SCAN_DEPTH` to a non-negative integer to change the default maximum depth of `4`. On Unix-like systems, separate multiple roots with `:`.
+
 Recognize projects using markers such as:
 
 ```text
@@ -133,6 +141,8 @@ Cargo.toml
 go.mod
 pom.xml
 CMakeLists.txt
+build.gradle
+build.gradle.kts
 ```
 
 ## Required Behavior
@@ -143,6 +153,9 @@ CMakeLists.txt
 * Handle missing scan roots
 * Handle permission errors gracefully
 * Use canonical project paths
+* Choose GitHub-only or all-local discovery at startup
+* Detect GitHub repositories from local Git remotes without network access
+* Refresh discovery with `r` or `R` without modifying project files
 
 ## Initial Ignore List
 
@@ -163,6 +176,10 @@ __pycache__
 Running phub displays real projects discovered from configured directories.
 
 Scanning does not execute project code.
+
+GitHub-only startup filtering uses local `git remote -v` metadata and makes no network requests.
+
+Pressing `r` or `R` discovers projects added since startup.
 
 ---
 
@@ -186,9 +203,9 @@ Detect:
 Example:
 
 ```text
-Forge       Python      main      ● dirty
+Aster       Python      main      ● dirty
 phub        Go          main      ✓ clean
-Website     TypeScript  dev       ✓ clean
+Cobalt     TypeScript  dev       ✓ clean
 ```
 
 ## Language Targets
@@ -244,7 +261,7 @@ Example:
 ```text
 Search: for
 
-Forge
+Aster
 terraform-lab
 ```
 
@@ -264,20 +281,24 @@ Esc clears search and returns to the full project list.
 
 # Milestone 0.0.5 — Project Opening
 
+## Status
+
+Implemented with an embedded PTY-backed terminal and theme presets. Post-exit metadata refresh remains deferred until the metadata milestone exists.
+
 ## Goal
 
 Allow the user to enter a selected project.
 
 ## Required
 
-Pressing `Enter` should open the configured shell in the project directory.
+Pressing `Enter` should open the configured shell in phub's embedded terminal with the project directory as its working directory. Typing `exit` or pressing `Ctrl+D` should return to phub.
 
 No manual `cd` should be necessary.
 
 Example:
 
 ```text
-Select Forge
+Select Aster
 Press Enter
 ```
 
@@ -285,19 +306,35 @@ Result:
 
 ```text
 shell working directory:
-~/Projects/Forge
+~/Projects/Aster
 ```
 
 ## Required Behavior
 
 * Use project directory as `cmd.Dir`.
 * Do not construct shell commands using string concatenation.
-* Restore phub when the child process exits when practical.
-* Refresh project metadata afterward.
+* Render shell output through a terminal emulator so ANSI applications remain usable.
+* Forward keyboard input to the PTY in order.
+* Restore the project list when the child process exits.
+* Refresh available project metadata afterward when the metadata milestone is implemented.
 
 ## Success Criteria
 
 The user can enter a real project directly from phub.
+
+## Theme Presets
+
+The TUI also provides an 18-item non-transparent color dropdown. Press `Ctrl+P` to open it, use Up/Down to highlight a preset, press Enter to apply it, or press Esc to cancel. Opening the picker alone never changes the theme.
+
+```text
+> Red Background
+  Red Theme
+  Red Combo
+  ...
+  Purple Combo
+```
+
+Background presets change the terminal background, Theme presets change the foreground while keeping an opaque neutral background, and Combo presets change both.
 
 ---
 
@@ -356,9 +393,9 @@ Allow:
 Display:
 
 ```text
-★ Forge
+★ Aster
 ★ phub
-  Website
+  Cobalt
 ```
 
 Favorites should sort before ordinary projects by default.
@@ -370,9 +407,9 @@ Opening a project updates its last-used timestamp.
 Possible display:
 
 ```text
-Forge        now
+Aster        now
 phub         1h
-Website      2d
+Cobalt      2d
 ```
 
 ## Success Criteria
@@ -532,7 +569,7 @@ phub 0.1.0 should reliably support:
 6. Opening a shell in a project.
 7. Opening Neovim.
 8. Opening Lazygit.
-9. Opening Forge.
+9. Opening Aster.
 10. Opening Yazi.
 11. Remembering favorites.
 12. Remembering recently used projects.
@@ -585,6 +622,12 @@ Add:
 * Launcher command construction
 * Working-directory handling
 * Missing executable behavior
+* Enter-to-shell behavior
+* Embedded PTY terminal lifecycle and exit handoff
+* Ctrl+P dropdown navigation and theme selection
+* Opaque background rendering for all theme presets
+* Refresh-key command construction and project-list replacement
+* Startup scope selection and scope-preserving refresh
 
 Do not launch real Neovim, Lazygit, or Forge during normal tests.
 
@@ -629,7 +672,7 @@ Do not introduce a database or daemon merely for performance speculation.
 Do not build these before 0.1.0:
 
 * AI project recommendations
-* GitHub integration
+* Remote GitHub API integration
 * GitLab integration
 * Repository cloning
 * SSH project management
@@ -741,7 +784,7 @@ for
 Select:
 
 ```text
-Forge
+Aster
 ```
 
 Press:
@@ -750,7 +793,7 @@ Press:
 n
 ```
 
-Neovim opens in Forge.
+Neovim opens in Aster.
 
 Or press:
 

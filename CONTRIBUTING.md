@@ -335,6 +335,8 @@ Discovery changes should include tests for:
 * Permission errors
 * Nested projects
 
+When GitHub-only filtering is involved, tests should use temporary projects and a fake `git` executable or temporary repositories. The filter must inspect local remotes only; it must not contact GitHub or any other network service.
+
 ---
 
 ## 12. Git Integration
@@ -398,6 +400,8 @@ Tool launching should:
 * Report missing tools clearly
 * Return control to phub cleanly when possible
 
+The Enter action uses phub's embedded PTY terminal. It forwards input to the configured shell and returns to the project list after `exit` or EOF.
+
 Do not automatically install missing tools.
 
 ---
@@ -446,6 +450,7 @@ Important UI principles:
 * Keyboard actions should be discoverable.
 * Small terminals should remain usable.
 * Important state must not depend on color alone.
+* Theme presets must render an opaque background.
 * Nerd Fonts should be optional.
 * Avoid permanently empty panels.
 * Avoid excessive animation.
@@ -464,11 +469,14 @@ Core navigation:
 j / ↓       down
 k / ↑       up
 Enter       open
+r / R       refresh project discovery
 /           search
 Esc         back / clear
 q           quit
 ?           help
 ```
+
+At startup, Up/Down selects GitHub-only or all-local discovery and Enter loads that scope. `r` or `R` preserves the selected scope.
 
 Tool actions:
 
@@ -479,6 +487,8 @@ f           Forge
 y           Yazi
 t           shell
 ```
+
+Theme selection opens a dropdown with `Ctrl+P`. Up/Down moves the highlight, Enter applies the preset, and Esc cancels. Opening the dropdown alone must not apply a theme.
 
 Changing established shortcuts should be considered a user-facing compatibility change.
 
@@ -752,6 +762,7 @@ A contribution is complete when:
 * External commands are constructed safely.
 * No unnecessary dependency was added.
 * Documentation matches reality.
+* Embedded terminal behavior is covered without launching real interactive tools in ordinary unit tests.
 * `gofmt` has been run.
 * `go vet ./...` passes.
 * `go test ./...` passes.

@@ -76,6 +76,14 @@ phub should feel like a tidy workbench: calm enough to read, precise enough to t
 - **States:** static; selection is communicated by the `>` character and accent color, never color alone.
 - **Accessibility:** `aria-label` explains that it is current prototype output; line wrapping is prevented within the specimen but the container scrolls horizontally on narrow screens.
 
+### Embedded Terminal Frame
+- **Structure:** a two-row chrome shell containing a project/shell header, live PTY body, and keyboard-control footer.
+- **Variants:** normal and compact terminal widths; both retain the same hierarchy and collapse the labels only when the terminal itself must truncate them.
+- **States:** active session, clean return, and nonzero shell return; shell status is informational unless PTY I/O or close fails.
+- **Accessibility:** project and shell context remain visible above the live terminal; keyboard controls stay explicit below it; the PTY cursor is offset below the header.
+- **Motion:** none; terminal output and cursor movement provide the meaningful motion.
+- **Layout:** full-screen shell; the PTY owns the body viewport and reserves two rows for chrome during start and resize.
+
 ### Install Step
 - **Structure:** ordinal label, concise explanation, and selectable code block.
 - **States:** static documentation; links retain hover and focus states.

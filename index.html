@@ -47,9 +47,9 @@
           <figure class="terminal" aria-label="Current phub prototype output">
             <figcaption class="terminal-bar">
               <span>phub</span>
-              <span>0.0.1 prototype</span>
+              <span>0.0.5 prototype</span>
             </figcaption>
-            <pre class="terminal-screen"><code><span class="terminal-prompt">$ phub</span><span class="terminal-search">Search projects... (press /)</span><span class="terminal-row terminal-selected">&gt; Forge</span><span class="terminal-row">  phub</span><span class="terminal-row">  ScreenBot</span><span class="terminal-row">  Website</span><span class="terminal-help">j/k or arrows: navigate | enter: open | /: search | q: quit</span></code></pre>
+            <pre class="terminal-screen"><code><span class="terminal-prompt">$ phub</span><span class="terminal-search">Search projects... (press /)</span><span class="terminal-row terminal-selected">&gt; Aster</span><span class="terminal-row">  Dune</span><span class="terminal-row">  Beacon</span><span class="terminal-row">  Cobalt</span><span class="terminal-help">j/k or arrows: navigate | enter: open | R refresh | ctrl+p themes | q: quit</span></code></pre>
           </figure>
         </div>
       </section>
@@ -122,6 +122,14 @@ cd phub</code></pre>
             <pre class="code-block" aria-label="Add Go bin directory to Fish path"><code>fish_add_path (go env GOPATH)/bin</code></pre>
             <p>For POSIX-compatible shells, use <code>export PATH="$(go env GOPATH)/bin:$PATH"</code>.</p>
           </details>
+          <details>
+            <summary>Configure project discovery</summary>
+            <p>By default, phub scans the user's home directory to find projects such as Aster and Dune. Override the roots and depth with environment variables.</p>
+            <pre class="code-block" aria-label="Configure phub project discovery on Unix-like systems"><code>PHUB_SCAN_ROOTS="$HOME/Projects:$HOME/Code" \
+PHUB_SCAN_DEPTH=3 \
+phub</code></pre>
+            <p>On Unix-like systems, multiple roots are separated with <code>:</code>. Discovery reads metadata only; it never runs project code or changes project files.</p>
+          </details>
         </div>
       </section>
 
@@ -136,15 +144,15 @@ cd phub</code></pre>
             <div class="status-row">
               <span class="status-state">Implemented</span>
               <div>
-                <h3>0.0.1 TUI prototype</h3>
-                <p>Hardcoded project list, selection state, Vim and arrow navigation, responsive terminal sizing, search and open placeholders, and clean quit behavior.</p>
+                <h3>0.0.1 + 0.0.2 + 0.0.5 prototype</h3>
+                <p>Keyboard navigation and responsive terminal sizing now operate on projects discovered from the home directory or configured roots. R rescans those roots, Enter launches the selected project's shell with an explicit working directory, and Ctrl+P opens an arrow-navigated dropdown with 18 opaque color presets.</p>
               </div>
             </div>
             <div class="status-row">
               <span class="status-state">Planned</span>
               <div>
-                <h3>Discovery and project metadata</h3>
-                <p>Real project scanning, language detection, Git status, search, launching, and persistence remain future milestones.</p>
+                <h3>Metadata and search</h3>
+                <p>Language detection, Git status, search, persistence, and TOML configuration remain future milestones.</p>
               </div>
             </div>
           </div>
@@ -168,14 +176,21 @@ cd phub</code></pre>
             <span>0.0.2</span>
             <div>
               <h3>Project discovery</h3>
-              <p>Planned: scan configured roots, detect project markers, and keep discovery read-only.</p>
+                <p>Available now: scan the home directory or configured roots, detect project markers, respect depth and ignore boundaries, refresh with R, and keep discovery read-only.</p>
             </div>
           </li>
           <li>
-            <span>0.0.3+</span>
+            <span>0.0.3-0.0.4</span>
             <div>
-              <h3>Metadata, search, and launch</h3>
-              <p>Planned: useful project state at a glance, fast filtering, and explicit tool handoff.</p>
+              <h3>Metadata and search</h3>
+              <p>Planned: useful project state at a glance and fast filtering.</p>
+            </div>
+          </li>
+          <li>
+            <span>0.0.5</span>
+            <div>
+              <h3>Project opening and themes</h3>
+                <p>Available now: Enter opens the selected project's shell in place, and Ctrl+P opens a dropdown where arrows move and Enter selects one of 18 six-color presets.</p>
             </div>
           </li>
         </ol>

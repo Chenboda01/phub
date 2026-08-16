@@ -276,7 +276,7 @@ A project should initially be identified by its canonical absolute path.
 For example:
 
 ```text
-/home/boda/Projects/Forge
+/home/user/Projects/Aster
 ```
 
 Project display names may change.
@@ -367,9 +367,7 @@ The ignore list should eventually be configurable.
 
 # 10. Scan Depth
 
-Scanning an entire home directory recursively can be extremely expensive.
-
-phub should use a configurable maximum discovery depth.
+The default scan root is the user's home directory, so phub must bound recursive discovery with a configurable maximum depth.
 
 Example:
 
@@ -379,16 +377,18 @@ Example:
 max_depth = 4
 ```
 
-If:
+For example, if:
 
 ```text
-~/Projects
+~
 ```
 
 is configured, phub might inspect:
 
 ```text
-~/Projects/Forge
+~/Aster
+~/Aster/Aster-AI
+~/Projects/Aster
 ~/Projects/Python/game
 ~/Projects/Web/website
 ```
@@ -583,7 +583,7 @@ Possible data:
 {
   "projects": [
     {
-      "path": "/home/boda/Projects/Forge",
+      "path": "/home/user/Projects/Aster",
       "favorite": true,
       "last_used": "2026-08-09T12:00:00Z"
     }
@@ -682,6 +682,8 @@ type Launcher interface {
     Launch(ctx context.Context, tool Tool, project project.Project) error
 }
 ```
+
+The current TUI implements the shell action through `Enter`. It starts the configured shell in an embedded PTY-backed terminal emulator with the selected project's path as its working directory. Typing `exit` or sending EOF returns to the project list; other tool actions remain separate integration work.
 
 ---
 
@@ -807,9 +809,9 @@ Example:
 │ Search projects...                                       │
 ├──────────────────────────────────────────────────────────┤
 │                                                         │
-│ ★ Forge          Python      main      ● 3 changes      │
+│ ★ Aster          Python      main      ● 3 changes      │
 │   phub           Go          main      ✓ clean          │
-│   ScreenBot      Python      main      ✓ clean          │
+│   Beacon      Python      main      ✓ clean          │
 │                                                         │
 ├──────────────────────────────────────────────────────────┤
 │ enter open · n nvim · g lazygit · f forge · ? help     │
@@ -966,9 +968,9 @@ They must not modify the project.
 Example:
 
 ```text
-★ Forge
+★ Aster
 ★ phub
-  Website
+  Cobalt
 ```
 
 Favorite state belongs in phub's persistent storage.
@@ -1158,6 +1160,8 @@ Test:
 * Duplicate projects
 * Manually registered projects
 
+GitHub-only discovery may additionally inspect each candidate's local Git remotes. It should accept GitHub remote URL forms without contacting GitHub or treating the remote as a command.
+
 Discovery should behave deterministically.
 
 ---
@@ -1239,6 +1243,8 @@ UI behavior worth testing includes:
 * Error messages
 * Small terminal sizes
 * Missing tools
+* Enter shell command construction and selected-project working directory
+* Ctrl+P picker handling and all 18 theme presets
 
 Core behavior should still be testable independently of Bubble Tea.
 
@@ -1343,23 +1349,23 @@ Do not add a heavyweight search engine.
 
 # 42. Startup Flow
 
-A normal startup should look like:
+A current discovery-only startup looks like:
 
 ```text
 Load configuration
       ↓
-Load project registry
+Render scope chooser
       ↓
-Render known projects
+Choose GitHub-only or all-local scope
       ↓
-Refresh discovery
+Scan configured roots
       ↓
-Refresh project metadata
+Filter local GitHub remotes when selected
       ↓
-Update UI incrementally
+Render projects
 ```
 
-The user should not have to wait for every repository to be inspected before seeing the interface.
+The scope chooser is rendered before discovery begins, so the application does not scan all projects before the user chooses a scope. A future registry may add known-project loading before discovery.
 
 ---
 
@@ -1373,9 +1379,7 @@ Welcome to phub.
 No projects found yet.
 
 Scan:
-  ~/Projects
-  ~/Code
-  ~/Python
+  ~
 
 [Enter] Scan
 [a] Add directory
@@ -1388,9 +1392,9 @@ phub should provide useful defaults without forcing the user to manually create 
 
 # 44. Refresh Behavior
 
-Users should be able to refresh project information.
+The current TUI refreshes project discovery with `r` or `R`, rescanning the default or configured roots and replacing the in-memory list. The operation is asynchronous and read-only. It preserves the startup-selected scope: GitHub-only refreshes scan candidates through local Git remotes, while all-local refresh keeps every discovered project.
 
-Potential key:
+Key:
 
 ```text
 R
@@ -1399,9 +1403,8 @@ R
 Refresh may update:
 
 * Project discovery
-* Git status
-* Tool availability
-* Environment information
+
+Git status, tool availability, and environment information remain future refresh sources.
 
 It should not modify projects.
 
@@ -1420,7 +1423,7 @@ It must **not** mean:
 Example confirmation:
 
 ```text
-Remove Forge from phub?
+Remove Aster from phub?
 
 The project files will NOT be deleted.
 
@@ -1464,7 +1467,7 @@ const (
 The UI may display:
 
 ```text
-Forge        ✓
+Aster        ✓
 OldProject   missing
 PrivateRepo  permission denied
 ```
@@ -1488,7 +1491,7 @@ Possible status:
 ```text
 Neovim     ✓
 Lazygit    ✓
-Forge      ✓
+Aster      ✓
 Yazi       ✗
 ```
 
@@ -1536,27 +1539,21 @@ Tool-specific arguments belong in the launcher configuration, not scattered thro
 
 ---
 
-# 50. Terminal Suspension
+# 50. Embedded Terminal Lifecycle
 
-When opening an interactive external program from the TUI, phub may need to suspend Bubble Tea temporarily.
-
-The intended lifecycle:
+The shell action stays inside phub instead of opening an external terminal window.
 
 ```text
-phub TUI
-   ↓
-Suspend
-   ↓
-Run nvim / lazygit / forge / shell
-   ↓
-Tool exits
-   ↓
-Resume phub
-   ↓
-Refresh project metadata
+phub project list
+       ↓ Enter
+Start PTY + configured shell
+       ↓
+Render PTY output through the virtual terminal emulator
+       ↓ exit / Ctrl+D
+Close PTY and return to phub
 ```
 
-This should feel seamless.
+The embedded terminal owns keyboard forwarding, ANSI screen state, cursor position, PTY resizing, and process cleanup. It must not construct shell command strings from project paths.
 
 ---
 
@@ -1597,6 +1594,8 @@ Avoid excessive gradients, animations, borders, and decorative elements.
 
 Speed and clarity matter more than spectacle.
 
+The current TUI includes an 18-item opaque color dropdown: Background, Theme, and Combo variants for Red, Orange, Yellow, Green, Blue, and Purple. `Ctrl+P` opens it; Up/Down changes the highlighted preset, Enter applies it, and Esc cancels without changing the current theme.
+
 ---
 
 # 53. Responsive Layout
@@ -1607,13 +1606,13 @@ Large:
 
 ```text
 PROJECT      LANG       BRANCH     STATUS       LAST USED
-Forge        Python     main       3 changes    now
+Aster        Python     main       3 changes    now
 ```
 
 Small:
 
 ```text
-Forge
+Aster
 Python · main · dirty
 ```
 
@@ -1790,7 +1789,7 @@ A future `.phub.toml` may define project actions.
 Example:
 
 ```toml
-name = "Forge"
+name = "Aster"
 
 [commands]
 run = ["python", "-m", "forge"]
@@ -2132,7 +2131,7 @@ They type:
 for
 ```
 
-Forge becomes selected.
+Aster becomes selected.
 
 They press:
 
@@ -2140,7 +2139,7 @@ They press:
 n
 ```
 
-Neovim opens in the Forge project.
+Neovim opens in the Aster project.
 
 They exit Neovim.
 

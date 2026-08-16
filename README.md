@@ -17,10 +17,10 @@ $ phub
 │                                                                 │
 │  PROJECT          LANG        BRANCH       STATUS        LAST   │
 │                                                                 │
-│  Forge            Python      main         ● 3 changes   now    │
-│  ScreenBot        Python      main         ✓ clean       2d     │
-│  Website          TypeScript  dev          ↑ 2           4d     │
-│  67-Challenge     Python      main         ✓ clean       12d    │
+│  Aster            Python      main         ● 3 changes   now    │
+│  Beacon        Python      main         ✓ clean       2d     │
+│  Cobalt          TypeScript  dev          ↑ 2           4d     │
+│  Nova-Challenge     Python      main         ✓ clean       12d    │
 │                                                                 │
 ├─────────────────────────────────────────────────────────────────┤
 │ enter open   n nvim   g lazygit   f forge   t terminal   ? help│
@@ -46,7 +46,7 @@ Finding the project is only the beginning.
 Then comes:
 
 ```bash
-cd ~/Projects/Forge
+cd ~/Projects/Aster
 source .venv/bin/activate
 git status
 nvim .
@@ -133,24 +133,21 @@ phub discovers that information and puts it in one place.
 
 # Project Discovery
 
-phub can scan configured directories for projects.
+**Implemented in 0.0.2.**
 
-Example:
-
-```bash
-phub scan ~/Projects
-```
-
-It may discover:
+phub scans configured directories for projects without executing project code or modifying project files. By default, it checks:
 
 ```text
-~/Projects/Forge
-~/Projects/website
-~/Projects/game
-~/Projects/phub
+~
 ```
 
-A directory may be recognized as a project through files such as:
+Override those roots with `PHUB_SCAN_ROOTS`, using your operating system's path-list separator. On Unix-like systems:
+
+```bash
+PHUB_SCAN_ROOTS="$HOME/Projects:$HOME/Code" PHUB_SCAN_DEPTH=3 phub
+```
+
+`PHUB_SCAN_DEPTH` defaults to `4` and accepts non-negative integers. A directory is recognized as a project when it contains one of these markers:
 
 ```text
 .git/
@@ -159,16 +156,16 @@ package.json
 Cargo.toml
 go.mod
 pom.xml
-Makefile
+build.gradle
+build.gradle.kts
 CMakeLists.txt
-Dockerfile
 ```
 
-Users may also register a directory manually:
+Discovery uses canonical paths, skips missing or unreadable roots gracefully, prevents duplicates, and does not descend into common dependency or build directories such as `.git`, `node_modules`, `.venv`, `target`, `dist`, and `build`.
 
-```bash
-phub add ~/some/project
-```
+At startup, phub asks which projects to load. **GitHub only** is selected by default; press Enter to load repositories with a local `github.com` remote. Move down and press Enter to load **all local projects** instead. GitHub-only filtering reads local Git metadata with explicit `git -C <project> remote -v` arguments, does not contact GitHub, and does not modify repositories.
+
+Press `r` or `R` to scan the home directory (or the roots from `PHUB_SCAN_ROOTS`) again and replace the project list while preserving the selected scope. The refresh remains read-only. TOML configuration, manual project registration, metadata, and search remain planned milestones. Pressing Enter on a discovered project now opens phub's embedded terminal with the configured shell in that project's working directory. Type `exit` or press `Ctrl+D` to return to phub.
 
 ---
 
@@ -179,13 +176,13 @@ The default interface shows projects rather than individual files.
 ```text
 ┌─ Projects ──────────────────────────────────────────────────────┐
 │                                                                │
-│  Forge                                                         │
+│  Aster                                                         │
 │  Python · main · 3 modified · used now                         │
 │                                                                │
-│  phub                                                          │
+│  Dune                                                          │
 │  Go · main · clean · used 1h ago                               │
 │                                                                │
-│  Website                                                       │
+│  Cobalt                                                       │
 │  TypeScript · dev · ahead 2 · used yesterday                   │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
@@ -200,9 +197,9 @@ Projects should be searchable immediately by typing.
 Selecting a project opens its details.
 
 ```text
-┌─ Forge ─────────────────────────────────────────────────────────┐
+┌─ Aster ─────────────────────────────────────────────────────────┐
 │                                                               │
-│ Path          ~/Projects/Forge                                │
+│ Path          ~/Projects/Aster                                │
 │ Language      Python                                          │
 │ Git           main                                            │
 │ Status        3 modified                                      │
@@ -253,7 +250,7 @@ Open Lazygit:
 phub open forge --with lazygit
 ```
 
-Open Forge:
+Open Aster:
 
 ```bash
 phub open forge --with forge
@@ -279,10 +276,18 @@ k / ↑       Move up
 g g         First project
 G           Last project
 Enter       Open project
+r / R       Refresh project discovery
 /           Search
 Esc         Clear / go back
 q           Quit
 ?           Help
+```
+
+Startup scope:
+
+```text
+Up/Down     Choose GitHub-only or all-local discovery
+Enter       Load the selected scope
 ```
 
 Project actions:
@@ -297,6 +302,17 @@ x           Run tests
 e           Edit project configuration
 *           Favorite
 ```
+
+Theme presets:
+
+```text
+Ctrl+P     Open theme picker
+Up/Down    Move through presets
+Enter      Apply selected preset
+Esc        Cancel
+```
+
+`Ctrl+P` opens a dropdown; it does not change the theme by itself. The 18 presets cover Red, Orange, Yellow, Green, Blue, and Purple, with a Background, Theme, and Combo option for each color.
 
 Keyboard bindings should eventually be configurable.
 
@@ -321,9 +337,9 @@ for
 Results update immediately:
 
 ```text
-Forge
-Forge-Test
-terraform-experiments
+Aster
+Aster-Test
+quantum-experiments
 ```
 
 Search may match:
@@ -352,7 +368,7 @@ phub should understand Git without trying to replace Git tools.
 Example:
 
 ```text
-Forge
+Aster
 
 Branch        main
 Working tree  3 modified
@@ -510,10 +526,10 @@ phub recent
 Example:
 
 ```text
-Forge          now
-phub           18 minutes ago
-ScreenBot      yesterday
-Website        3 days ago
+Aster          now
+Dune           18 minutes ago
+Beacon      yesterday
+Cobalt        3 days ago
 ```
 
 Recent activity should be stored locally.
@@ -527,10 +543,10 @@ Opening a project through phub updates its last-used timestamp.
 Frequently used projects can be pinned.
 
 ```text
-★ Forge
-★ phub
-  ScreenBot
-  Website
+★ Aster
+★ Dune
+  Beacon
+  Cobalt
 ```
 
 Favorites appear before ordinary projects unless another sort is selected.
@@ -542,7 +558,7 @@ Favorites appear before ordinary projects unless another sort is selected.
 A future project-health view may show:
 
 ```text
-Forge
+Aster
 
 Git             ✓
 Environment     ✓
@@ -623,7 +639,7 @@ Project-specific configuration may later live in:
 Example:
 
 ```toml
-name = "Forge"
+name = "Aster"
 
 [commands]
 run = ["forge"]
@@ -664,7 +680,9 @@ y → yazi
 ### Terminal
 
 ```text
-t → open shell in project
+Enter  → open phub's embedded terminal in the selected project
+exit   → close the project terminal and return to phub
+Ctrl+D → close the project terminal and return to phub
 ```
 
 phub should allow users to replace these tools through configuration.
@@ -935,7 +953,7 @@ for
 Select:
 
 ```text
-Forge
+Aster
 ```
 
 Press:
@@ -947,7 +965,7 @@ n
 Result:
 
 ```text
-Neovim opens in ~/Projects/Forge
+Neovim opens in ~/Projects/Aster
 ```
 
 Or:
@@ -959,7 +977,7 @@ g
 Result:
 
 ```text
-Lazygit opens in ~/Projects/Forge
+Lazygit opens in ~/Projects/Aster
 ```
 
 Or:
@@ -971,7 +989,7 @@ f
 Result:
 
 ```text
-Forge opens with ~/Projects/Forge as its workspace
+Forge opens with ~/Projects/Aster as its workspace
 ```
 
 That's phub.
