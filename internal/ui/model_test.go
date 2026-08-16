@@ -260,6 +260,22 @@ func TestModelViewUsesOpaqueBackground_forEveryThemePreset(t *testing.T) {
 	}
 }
 
+func TestModelShowsBuildVersion_whenProjectListIsRendered(t *testing.T) {
+	// Given
+	previous := Version
+	Version = "abc1234"
+	t.Cleanup(func() { Version = previous })
+	current := newModel(testProjects(), "/bin/sh")
+
+	// When
+	content := current.render()
+
+	// Then
+	if !strings.Contains(content, "phub abc1234") {
+		t.Fatalf("rendered content does not show the build version:\n%s", content)
+	}
+}
+
 func updateModel(t *testing.T, current model, message tea.Msg) (model, tea.Cmd) {
 	t.Helper()
 

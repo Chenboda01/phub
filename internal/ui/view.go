@@ -9,6 +9,8 @@ import (
 
 const compactWidth = 64
 
+var Version = "dev"
+
 func (m model) View() tea.View {
 	view := tea.NewView(m.paintBackground(m.render()))
 	view.AltScreen = true
@@ -61,7 +63,9 @@ func (m model) startupView() string {
 		content.WriteString(m.notice)
 		content.WriteByte('\n')
 	}
-	content.WriteString("\nup/down | enter load | q quit\n")
+	content.WriteString("\nup/down | enter load | q quit · phub ")
+	content.WriteString(Version)
+	content.WriteByte('\n')
 
 	return content.String()
 }
@@ -85,7 +89,9 @@ func (m model) standardView() string {
 		content.WriteString(m.notice)
 		content.WriteByte('\n')
 	}
-	content.WriteString("\nj/k arrows | enter open | ctrl+p themes | R refresh | q quit\n")
+	content.WriteString("\nj/k arrows | enter open | ctrl+p themes | R refresh | q quit · phub ")
+	content.WriteString(Version)
+	content.WriteByte('\n')
 
 	return content.String()
 }

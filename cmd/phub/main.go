@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	tea "charm.land/bubbletea/v2"
 	"phub/internal/discovery"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	ui.Version = buildVersion()
 	program := tea.NewProgram(ui.NewWithLoader(os.Getenv("SHELL"), func(scope ui.ProjectScope) ([]ui.Project, error) {
 		return discoverProjectsForScope(context.Background(), scope)
 	}))
@@ -18,6 +20,23 @@ func main() {
 		fmt.Fprintln(os.Stderr, "phub could not start:", err)
 		os.Exit(1)
 	}
+}
+
+func buildVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "dev"
+	}
+	for _, setting := range info.Settings {
+		if setting.Key != "vcs.revision" {
+			continue
+		}
+		if len(setting.Value) >= 7 {
+			return setting.Value[:7]
+		}
+		return setting.Value
+	}
+	return "dev"
 }
 
 func discoverProjects(ctx context.Context) ([]ui.Project, error) {
